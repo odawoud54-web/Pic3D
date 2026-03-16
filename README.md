@@ -1,109 +1,74 @@
-# Pic3D - Transform 2D Images into 3D Models
+# Pic3D - AI 2D to 3D Model Converter
 
-Pic3D is an AI-powered web application that converts 2D images into 3D models ready for import into Blender and other 3D software.
-
-## How It Works
-
-1. **Upload** any 2D image (PNG, JPG, WEBP)
-2. **AI Depth Estimation** analyzes the image to generate a depth map
-3. **Mesh Generation** creates a 3D displaced mesh from the depth data
-4. **Download** as `.OBJ` or `.GLB` format for Blender
+Convert 2D images into 3D models for Blender using Google Gemini AI. Upload any picture and get an exportable 3D model with optional skeleton for animation.
 
 ## Features
 
-- Drag-and-drop image upload with preview
-- AI-powered monocular depth estimation (via Hugging Face API or built-in fallback)
-- Real-time 3D preview with Three.js (orbit, zoom, pan)
-- Export to OBJ format (native Blender import)
-- Export to GLB format (universal 3D format)
-- Dark theme UI built with Tailwind CSS
-- Fully server-side mesh generation
-
-## Tech Stack
-
-- **Frontend**: Next.js 15, React 19, Tailwind CSS v4
-- **3D Rendering**: Three.js, React Three Fiber, React Three Drei
-- **AI/ML**: Hugging Face Inference API (Intel DPT-Large) with local fallback
-- **Image Processing**: Sharp
-- **3D Export**: Custom OBJ and GLB generators
+- **AI-Powered Depth Analysis** -- Uses Google Gemini to analyze 2D images and estimate depth
+- **3D Mesh Generation** -- Converts depth data into a displacement mesh with front and back faces
+- **Interactive 3D Preview** -- Real-time Three.js viewer with orbit controls
+- **Skeleton Detection** -- AI detects articulable objects and suggests joint/bone structure
+- **Skeleton Toggle** -- Switch button to show/hide skeleton overlay in the 3D preview
+- **Blender Export** -- Download OBJ files and auto-import Python scripts for Blender
+- **Automatic Rigging** -- Blender script sets up armature and parents mesh to skeleton
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm
+- A [Google Gemini API key](https://aistudio.google.com/app/apikey)
 
 ### Installation
 
 ```bash
+# Install dependencies
 npm install
-```
 
-### Environment Variables (Optional)
-
-For best quality depth estimation, set a Hugging Face API token:
-
-```bash
+# Copy environment file and add your Gemini API key
 cp .env.example .env.local
-# Edit .env.local and add your Hugging Face token
-```
+# Edit .env.local and set GEMINI_API_KEY=your_key_here
 
-Without an API token, the app uses a built-in pseudo-depth generator based on image luminance and edge detection. It works well for demos but produces less accurate depth maps.
-
-### Development
-
-```bash
+# Run the development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Production Build
+### Using with Blender
 
-```bash
-npm run build
-npm start
-```
+1. Upload an image and generate the 3D model
+2. Download both the **OBJ file** and the **Blender Script**
+3. Place both files in the same directory
+4. Open Blender and go to **Scripting** workspace
+5. Open the `pic3d_import.py` script and run it
+6. The model will be imported with skeleton rigging applied automatically
 
-## Importing into Blender
+## Tech Stack
 
-### OBJ Import
-1. Open Blender
-2. Go to **File > Import > Wavefront (.obj)**
-3. Select the downloaded `.obj` file
-4. The model will appear in the viewport with UV coordinates ready for texturing
+- **Next.js 15** -- React framework with App Router
+- **TypeScript** -- Type-safe development
+- **Tailwind CSS** -- Utility-first styling
+- **Three.js / React Three Fiber** -- 3D rendering
+- **Google Gemini API** -- AI image analysis and depth estimation
 
-### GLB Import
-1. Open Blender
-2. Go to **File > Import > glTF 2.0 (.glb/.gltf)**
-3. Select the downloaded `.glb` file
-
-### Tips for Best Results
-- Use images with clear depth separation (foreground/background)
-- Landscape and architectural photos work particularly well
-- Portrait photos with blurred backgrounds produce nice depth relief
-- Adjust the mesh scale in Blender after import as needed
-
-## Architecture
+## Project Structure
 
 ```
 src/
   app/
-    page.tsx          # Main page with upload/preview/download UI
-    layout.tsx        # Root layout with metadata
-    globals.css       # Global styles and animations
-    api/
-      depth/route.ts  # Depth estimation API endpoint
-      mesh/route.ts   # Mesh generation API endpoint
+    api/generate-3d/route.ts   # API endpoint for Gemini + mesh generation
+    layout.tsx                  # Root layout
+    page.tsx                    # Main application page
+    globals.css                 # Global styles
   components/
-    Header.tsx        # App header/navigation
-    ImageUploader.tsx # Drag-and-drop upload component
-    ModelViewer.tsx   # Three.js 3D model viewer
-    ProcessingStatus.tsx # Processing progress indicator
+    ImageUploader.tsx           # Drag-and-drop image upload
+    ThreeViewer.tsx             # 3D model preview with Three.js
+    SkeletonToggle.tsx          # Toggle switch for skeleton visibility
+    ExportPanel.tsx             # Download buttons for OBJ and Blender script
   lib/
-    depth.ts          # Depth estimation (HF API + fallback)
-    mesh.ts           # OBJ and GLB mesh generation
+    gemini.ts                   # Gemini API client for depth analysis
+    meshGenerator.ts            # 3D mesh generation and OBJ/Blender export
 ```
 
 ## License
